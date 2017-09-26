@@ -1,0 +1,3 @@
+#!/bin/bash
+
+bin/subcommands/templates && bin/subcommands/docker_up && bin/subcommands/pipework && bin/subcommands/env_prepare 

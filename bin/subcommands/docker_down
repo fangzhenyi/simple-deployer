@@ -1,0 +1,13 @@
+#!/bin/sh
+BIN_DIR=$(dirname "${BASH_SOURCE-$0}")
+BIN_DIR=$(cd "$BIN_DIR"; pwd)
+
+#whether docker-compose has installed
+type docker-compose > /dev/null 2>&1
+
+#if docker-compose dose not install, will use the instead-compose.py
+if [ $? -eq 0 ]; then
+  docker-compose down --remove-orphans
+else
+  python ${BIN_DIR}/../instead-compose.py down
+fi

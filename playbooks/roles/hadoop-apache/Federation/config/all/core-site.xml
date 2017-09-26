@@ -1,0 +1,14 @@
+<configuration>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>viewfs://defaultCluster</value>
+  </property>
+  <property>
+    <name>fs.viewfs.mounttable.defaultCluster.link./hbase</name>
+    <value>hdfs://ns1/hbase</value>
+  </property>
+  <property>
+    <name>fs.viewfs.mounttable.defaultCluster.link./hive</name>
+    <value>hdfs://ns2/hive</value>
+  </property>
+</configuration>

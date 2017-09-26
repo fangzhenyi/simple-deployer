@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ ! -f ~/.ssh/id_rsa.pub ]; then
+  echo "No ssh public key found, run ssh-keygen..."
+  ssh-keygen -f ~/.ssh/id_rsa -P ""
+fi
+
+case "${PROVISION_TYPE}" in
+"docker_public" | "docker_private")
+  ./bin/subcommands/provision_${PROVISION_TYPE}
+  ;;
+"public")
+  ./bin/subcommands/provision_public
+  ;;
+"skip" | *)
+  echo "Provision skipped."
+  ;;
+esac

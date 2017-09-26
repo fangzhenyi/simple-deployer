@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cat hosts | ./templates.py docker-compose.yml.tpl > docker-compose.yml
+cat hosts | ./templates.py hosts.layout.tpl > playbooks/hosts.layout

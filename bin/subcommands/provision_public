@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cp productions/hosts.layout playbooks && bin/subcommands/env_prepare

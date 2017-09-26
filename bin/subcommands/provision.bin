@@ -1,0 +1,5 @@
+#!/bin/bash
+
+PROVISION_TYPE=${PROVISION_TYPE:-"public"}
+
+source bin/subcommands/do_provision

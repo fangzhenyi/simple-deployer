@@ -1,0 +1,19 @@
+#!/bin/bash
+
+host_file=playbooks/hosts.layout
+
+host_info=$(sed -n "s/^\s*\(\w*\)\s*ansible_ssh_host=\(\S*\)\s*ansible_ssh_user=.*ansible_ssh_pass=.*/\1:\2/p" ${host_file})
+
+for host in ${host_info}
+do
+  hostname=$(echo ${host}|awk -F ':' '{ print $1 }')
+  hostip=$(echo ${host}|awk -F ':' '{ print $2 }')
+  gateway=`bin/get_ip_address.py br0`
+  if [[ $hostip == 192.168.* ]]; then
+    network=${hostip}/24
+  else
+    network=${hostip}/24@${gateway}
+  fi  
+  echo ${network}
+  bin/pipework br0 ${hostname} ${network} || exit $?
+done

@@ -1,0 +1,11 @@
+- name: upload system hosts file
+  template: src=hosts.tpl dest=/etc/hosts.hadoop
+
+- name: cat /etc/hosts.hadoop > /etc/hosts
+  shell: cat /etc/hosts.hadoop > /etc/hosts
+              
+- name: remove invalid dns
+  shell: cat /etc/resolv.conf | grep -v "nameserver 8.8.8.8" | grep -v "nameserver 8.8.4.4" > resolv.tmp && cat resolv.tmp > /etc/resolv.conf && rm -f resolv.tmp
+
+- name: add authorized key
+  authorized_key: user=root key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"

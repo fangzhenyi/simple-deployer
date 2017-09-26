@@ -1,0 +1,13 @@
+#!/bin/bash
+
+DOCKER_COMPOSE_YML=${DOCKER_COMPOSE_YML:-"docker-compose.yml.tpl"}
+echo "using ${DOCKER_COMPOSE_YML} as docker-compose.yml"
+./templates.private.py ${DOCKER_COMPOSE_YML} > docker-compose.yml && \
+echo 'COMPOSE_PROJECT_NAME='$(./bin/container-name.sh) > .env && \
+bin/subcommands/docker_up && \
+bin/subcommands/update_etc_hosts && \
+HOSTS_LAYOUT=${HOSTS_LAYOUT:-"hosts.layout.tpl"}
+echo "using ${HOSTS_LAYOUT} as hosts.layout"
+./templates.private.py ${HOSTS_LAYOUT} > playbooks/hosts.layout || exit $?
+
+bin/subcommands/env_prepare

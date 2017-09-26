@@ -1,0 +1,4 @@
+#!/bin/bash
+
+bin/subcommands/docker_down && \
+echo "$(cat /etc/hosts)" | grep $(./bin/container-name.sh) -v > /etc/hosts

@@ -1,0 +1,10 @@
+---
+#- name: determine interface eth1
+#  set_fact: ipv4_address="{{ hostvars[inventory_hostname].ansible_eth1.ipv4.address }}"
+#  # eg. to use a eth1: ipv4_address="{{ hostvars[inventory_hostname].ansible_eth1.ipv4.address }}"
+#  when: hostvars[inventory_hostname].ansible_eth1 is defined # 如果使用pipework设置了eth1网卡，用来与外部通信，则使用eth1
+
+#- name: determine interface eth0
+#  set_fact: ipv4_address="{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}"
+#  # eg. to use a eth1: ipv4_address="{{ hostvars[inventory_hostname].ansible_eth1.ipv4.address }}"
+#  when: hostvars[inventory_hostname].ansible_eth1 is undefined # 如果没有设置eth1网卡，则使用eth0

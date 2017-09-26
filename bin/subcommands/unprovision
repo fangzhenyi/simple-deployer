@@ -1,0 +1,12 @@
+#!/bin/bash
+
+PROVISION_TYPE=${PROVISION_TYPE:-"docker_private"}
+
+case "${PROVISION_TYPE}" in
+"docker_public" | "docker_private")
+  ./bin/subcommands/unprovision_docker_private
+  ;;
+"skip" | *)
+  echo "Unprovision skipped."
+  ;;
+esac

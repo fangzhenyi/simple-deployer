@@ -1,0 +1,122 @@
+---
+- name: copy binaries to /opt
+  copy:
+    src: '{{ PRODUCTIONS_BASE }}/{{ item.src }}'
+    dest: '/opt/{{ item.dest }}'
+  with_items:
+    - { src: 'hadoop/', dest: ''}
+
+- name: unzip jdk
+  shell: rm -rf jdk && mkdir jdk && tar -xf jdk*.tar.gz -C jdk --strip-components=1 chdir=/opt
+
+- name: unzip hadoop binaries
+  shell: rm -rf hadoop && mkdir hadoop && tar -xf hadoop-*.tar.gz -C hadoop --strip-components=1 chdir=/opt
+
+- name: export JAVA_HOME
+  lineinfile:
+    dest: /opt/hadoop/etc/hadoop/hadoop-env.sh
+    regexp: '^# export JAVA_HOME'
+    line: 'export JAVA_HOME=/opt/jdk'
+
+- name: add HADOOP_HOME
+  lineinfile:
+    dest: /etc/profile
+    line: 'HADOOP_HOME=/opt/hadoop'
+
+- name: export HADOOP_HOME
+  lineinfile:
+    dest: /etc/profile
+    line: 'export HADOOP_HOME'
+
+- name: export HADOOP_HOME/bin
+  lineinfile:
+    dest: /etc/profile
+    line: 'export PATH=${HADOOP_HOME}/bin:$PATH'
+
+- name: set hadoop user as root
+  lineinfile:
+    dest: /opt/hadoop/etc/hadoop/hadoop-env.sh
+    line: 'export {{ item }}=root'
+  with_items:
+    - HDFS_NAMENODE_USER
+    - HDFS_DATANODE_USER
+    - HDFS_JOURNALNODE_USER
+    - YARN_RESOURCEMANAGER_USER
+    - YARN_NODEMANAGER_USER
+
+- name: copy hadoop configures
+  template:
+    src: '{{ item }}'
+    dest: /opt/hadoop/etc/hadoop/
+    mode: 0644
+  with_fileglob:
+    - 'config/*'
+
+- name: setup passphraseless ssh
+  copy:
+    src: ~/.ssh/{{ item.name }}
+    dest: ~/.ssh/
+    mode: '{{ item.mode }}'
+  with_items:
+    - { name: 'id_rsa', mode: '0600' }
+    - { name: 'id_rsa.pub', mode: '0644' }
+
+- name: start journalnode
+  shell: bin/hdfs --daemon start journalnode chdir=/opt/hadoop
+  async: 10
+  poll: 5
+
+- name: wait for journalnode to come online
+  wait_for:
+    host: '{{ hostvars[inventory_hostname].ansible_default_ipv4.address }}'
+    port: 8485
+    delay: 5
+    timeout: 15
+
+- name: format nn1
+  shell: bin/hdfs namenode -format -force chdir=/opt/hadoop
+  when: inventory_hostname == groups['namenodes'][0]
+
+- name: start nn1
+  shell: bin/hdfs --daemon start namenode chdir=/opt/hadoop
+  async: 10
+  poll: 5
+  when: inventory_hostname == groups['namenodes'][0]
+
+- name: wait for nn1 to come online
+  wait_for:
+    host: '{{ hostvars[inventory_hostname].ansible_default_ipv4.address }}'
+    port: 9820
+    delay: 5
+    timeout: 15
+  when: inventory_hostname == groups['namenodes'][0]
+
+- name: boostrap standby nn2
+  shell: bin/hdfs namenode -bootstrapStandby -force chdir=/opt/hadoop
+  when: inventory_hostname == groups['namenodes'][1]
+
+- name: stop hdfs
+  shell: sbin/stop-dfs.sh chdir=/opt/hadoop
+
+- name: start hdfs/yarn
+  shell: sbin/start-all.sh chdir=/opt/hadoop
+
+- name: transition nn1 to active
+  shell: bin/hdfs haadmin -transitionToActive nn1 chdir=/opt/hadoop
+  when: inventory_hostname == groups['namenodes'][0]
+
+- name: hdfs report
+  shell: bin/hdfs dfsadmin -report chdir=/opt/hadoop
+  register: report
+  when: inventory_hostname == groups['namenodes'][0]
+
+- debug: var=report.stdout_lines
+  when: inventory_hostname == groups['namenodes'][0]
+
+- name: yarn node list
+  shell: bin/yarn node -list chdir=/opt/hadoop
+  register: list
+  when: inventory_hostname == groups['resourcemanagers'][0]
+
+- debug: var=list.stdout_lines
+  when: inventory_hostname == groups['resourcemanagers'][0]

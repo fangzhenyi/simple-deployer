@@ -1,0 +1,49 @@
+{{ HOSTNAME_1 }}:
+  image: ubuntu14.04
+  hostname: {{ HOSTNAME_1 }}
+  container_name: {{ HOSTNAME_1 }}
+  ports:
+    - "2345-2346"
+  volumes:
+    - ./autotests:/autotests
+  privileged: true
+
+{{ HOSTNAME_2 }}:
+  image: ubuntu14.04
+  hostname: {{ HOSTNAME_2 }}
+  container_name: {{ HOSTNAME_2 }}
+  ports:
+    - "2345-2346"
+  volumes:
+    - ./autotests:/autotests
+  privileged: true
+
+{{ HOSTNAME_3 }}:
+  image: ubuntu14.04
+  hostname: {{ HOSTNAME_3 }}
+  container_name: {{ HOSTNAME_3 }}
+  ports:
+    - "2345-2346"
+  volumes:
+    - ./autotests:/autotests
+  privileged: true
+
+{{ HOSTNAME_4 }}:
+  image: ubuntu14.04
+  hostname: {{ HOSTNAME_4 }}
+  container_name: {{ HOSTNAME_4 }}
+  ports:
+    - "2345-2346"
+  volumes:
+    - ./autotests:/autotests
+  privileged: true
+
+{{ HOSTNAME_5 }}:
+  image: ubuntu14.04
+  hostname: {{ HOSTNAME_5 }}
+  container_name: {{ HOSTNAME_5 }}
+  ports:
+    - "2345-2346"
+  volumes:
+    - ./autotests:/autotests
+  privileged: true

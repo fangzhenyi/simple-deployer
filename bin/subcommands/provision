@@ -1,0 +1,5 @@
+#!/bin/bash
+
+PROVISION_TYPE=${PROVISION_TYPE:-"docker_private"}
+
+source bin/subcommands/do_provision
