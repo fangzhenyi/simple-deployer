@@ -9,6 +9,9 @@
 - name: unzip jdk
   shell: rm -rf jdk && mkdir jdk && tar -xf jdk*.tar.gz -C jdk --strip-components=1 chdir=/opt
 
+- name: unzip zookeeper binaries
+  shell: rm -rf zookeeper && mkdir zookeeper && tar -xf zookeeper-*.tar.gz -C zookeeper --strip-components=1 chdir=/opt
+
 - name: unzip hadoop binaries
   shell: rm -rf hadoop && mkdir hadoop && tar -xf hadoop-*.tar.gz -C hadoop --strip-components=1 chdir=/opt
 
@@ -17,6 +20,25 @@
     dest: /opt/hadoop/etc/hadoop/hadoop-env.sh
     regexp: '^# export JAVA_HOME'
     line: 'export JAVA_HOME=/opt/jdk'
+
+- name: copy zookeeper configures
+  template:
+    src: '{{ item }}'
+    dest: /opt/zookeeper/conf/
+    mode: 0644
+  with_fileglob:
+    - 'config/zookeeper/*'
+  when: inventory_hostname in groups['zookeepers']
+
+- name: set zookeeper myid
+  shell: dataDir=$(sed -n 's/dataDir=\(.*\)/\1/p' /opt/zookeeper/conf/zoo.cfg) && mkdir -p ${dataDir} && sed -n 's/server\.\([0-9]*\)='$(hostname -s)'\:[0-9]*\:[0-9]*/\1/p' /opt/zookeeper/conf/zoo.cfg > ${dataDir}/myid
+  when: inventory_hostname in groups['zookeepers']
+
+- name: start zookeeper
+  shell: ./bin/zkServer.sh start chdir=/opt/zookeeper
+  async: 10
+  poll: 5
+  when: inventory_hostname in groups['zookeepers']
 
 - name: add HADOOP_HOME
   lineinfile:
@@ -41,6 +63,7 @@
     - HDFS_NAMENODE_USER
     - HDFS_DATANODE_USER
     - HDFS_JOURNALNODE_USER
+    - HDFS_ZKFC_USER
     - YARN_RESOURCEMANAGER_USER
     - YARN_NODEMANAGER_USER
 
@@ -106,6 +129,10 @@
     - 'bin/start2.7.3.sh'
     - 'bin/start3.0.0.sh'
 
+- name: format ZK
+  shell: ./bin/hdfs zkfc -formatZK chdir=/opt/hadoop
+  when: inventory_hostname == groups['ns1.namenodes'][0] or inventory_hostname == groups['ns2.namenodes'][0]
+
 - name: start journalnode
   shell: ./start{{HADOOP_VERSION}}.sh journalnode chdir=/opt/hadoop
   async: 10
@@ -150,13 +177,13 @@
   shell: sbin/start-all.sh chdir=/opt/hadoop
   when: inventory_hostname == groups['ns1.namenodes'][0]
 
-- name: transition ns1.nn1 to active
-  shell: bin/hdfs haadmin -ns ns1 -transitionToActive nn1 chdir=/opt/hadoop
-  when: inventory_hostname == groups['ns1.namenodes'][0]
+  # - name: transition ns1.nn1 to active
+  # shell: bin/hdfs haadmin -ns ns1 -transitionToActive nn1 chdir=/opt/hadoop
+  # when: inventory_hostname == groups['ns1.namenodes'][0]
 
-- name: transition ns2.nn1 to active
-  shell: bin/hdfs haadmin -ns ns2 -transitionToActive nn1 chdir=/opt/hadoop
-  when: inventory_hostname == groups['ns2.namenodes'][0]
+  # - name: transition ns2.nn1 to active
+  # shell: bin/hdfs haadmin -ns ns2 -transitionToActive nn1 chdir=/opt/hadoop
+  # when: inventory_hostname == groups['ns2.namenodes'][0]
 
   #- name: hdfs report
   #shell: bin/hdfs dfsadmin -report chdir=/opt/hadoop

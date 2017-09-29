@@ -11,4 +11,8 @@
     <name>fs.viewfs.mounttable.defaultCluster.link./hive</name>
     <value>hdfs://ns2/hive</value>
   </property>
+  <property>
+    <name>ha.zookeeper.quorum</name>
+    <value>{% for host in groups['zookeepers'] %}{{ hostvars[host]['inventory_hostname'] }}:2181,{% endfor %}</value>
+  </property>
 </configuration>
