@@ -200,3 +200,12 @@
 
 - debug: var=list.stdout_lines
   when: inventory_hostname == groups['resourcemanagers'][0]
+
+- name: mkdir dirs
+  shell: bin/hdfs dfs -mkdir {{ item }} chdir=/opt/hadoop
+  with_items:
+    - 'hdfs://ns1/hbase'
+    - 'hdfs://ns2/hive'
+    - 'hdfs://ns1/benchmarks'
+    - 'hdfs://ns1/tmp'
+    - 'hdfs://ns1/home'

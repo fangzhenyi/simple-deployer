@@ -4,12 +4,28 @@
     <value>viewfs://defaultCluster</value>
   </property>
   <property>
+    <name>fs.viewfs.mounttable.defaultCluster.homedir</name>
+    <value>/home</value>
+  </property>
+  <property>
+    <name>fs.viewfs.mounttable.defaultCluster.link./home</name>
+    <value>hdfs://nn1/home</value>
+  </property>
+  <property>
     <name>fs.viewfs.mounttable.defaultCluster.link./hbase</name>
     <value>hdfs://ns1/hbase</value>
   </property>
   <property>
     <name>fs.viewfs.mounttable.defaultCluster.link./hive</name>
     <value>hdfs://ns2/hive</value>
+  </property>
+  <property>
+    <name>fs.viewfs.mounttable.defaultCluster.link./benchmarks</name>
+    <value>hdfs://ns1/benchmarks</value>
+  </property>
+  <property>
+    <name>fs.viewfs.mounttable.defaultCluster.link./tmp</name>
+    <value>hdfs://ns1/tmp</value>
   </property>
   <property>
     <name>ha.zookeeper.quorum</name>
